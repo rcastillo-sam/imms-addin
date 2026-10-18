@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
+           xsi:type="MailApp">
+  <Id>6c119159-43f0-45d6-bc57-048e15927518</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>ICAO SAM</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="IMMS SAM"/>
+  <Description DefaultValue="File emails into IMMS SAM matters, search matters and open the matter board."/>
+  <IconUrl DefaultValue="https://rcastillo-sam.github.io/imms-addin/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://rcastillo-sam.github.io/imms-addin/icon-128.png"/>
+  <SupportUrl DefaultValue="https://rcastillo-sam.github.io/imms-addin/"/>
+  <AppDomains>
+    <AppDomain>https://rcastillo-sam.github.io</AppDomain>
+    <AppDomain>https://apps.powerapps.com</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Mailbox"/>
+  </Hosts>
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://rcastillo-sam.github.io/imms-addin/taskpane.html?mode=save"/>
+        <RequestedHeight>250</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+  <Permissions>ReadWriteMailbox</Permissions>
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
+  </Rule>
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Requirements>
+      <bt:Sets DefaultMinVersion="1.8">
+        <bt:Set Name="Mailbox"/>
+      </bt:Sets>
+    </Requirements>
+    <Hosts>
+      <Host xsi:type="MailHost">
+        <DesktopFormFactor>
+          <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="immsGroup">
+                <Label resid="groupLabel"/>
+                <Control xsi:type="Button" id="btnSave">
+                  <Label resid="saveLabel"/>
+                  <Supertip>
+                    <Title resid="saveLabel"/>
+                    <Description resid="saveTip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="iconSave16"/>
+                    <bt:Image size="32" resid="iconSave32"/>
+                    <bt:Image size="80" resid="iconSave80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="urlSave"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="btnSearch">
+                  <Label resid="searchLabel"/>
+                  <Supertip>
+                    <Title resid="searchLabel"/>
+                    <Description resid="searchTip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="iconSearch16"/>
+                    <bt:Image size="32" resid="iconSearch32"/>
+                    <bt:Image size="80" resid="iconSearch80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="urlSearch"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="btnBoard">
+                  <Label resid="boardLabel"/>
+                  <Supertip>
+                    <Title resid="boardLabel"/>
+                    <Description resid="boardTip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="iconBoard16"/>
+                    <bt:Image size="32" resid="iconBoard32"/>
+                    <bt:Image size="80" resid="iconBoard80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="urlBoard"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="iconSave16" DefaultValue="https://rcastillo-sam.github.io/imms-addin/save-16.png"/>
+        <bt:Image id="iconSave32" DefaultValue="https://rcastillo-sam.github.io/imms-addin/save-32.png"/>
+        <bt:Image id="iconSave80" DefaultValue="https://rcastillo-sam.github.io/imms-addin/save-80.png"/>
+        <bt:Image id="iconSearch16" DefaultValue="https://rcastillo-sam.github.io/imms-addin/search-16.png"/>
+        <bt:Image id="iconSearch32" DefaultValue="https://rcastillo-sam.github.io/imms-addin/search-32.png"/>
+        <bt:Image id="iconSearch80" DefaultValue="https://rcastillo-sam.github.io/imms-addin/search-80.png"/>
+        <bt:Image id="iconBoard16" DefaultValue="https://rcastillo-sam.github.io/imms-addin/board-16.png"/>
+        <bt:Image id="iconBoard32" DefaultValue="https://rcastillo-sam.github.io/imms-addin/board-32.png"/>
+        <bt:Image id="iconBoard80" DefaultValue="https://rcastillo-sam.github.io/imms-addin/board-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="urlSave" DefaultValue="https://rcastillo-sam.github.io/imms-addin/taskpane.html?mode=save"/>
+        <bt:Url id="urlSearch" DefaultValue="https://rcastillo-sam.github.io/imms-addin/taskpane.html?mode=search"/>
+        <bt:Url id="urlBoard" DefaultValue="https://rcastillo-sam.github.io/imms-addin/taskpane.html?mode=board"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="groupLabel" DefaultValue="IMMS SAM"/>
+        <bt:String id="saveLabel" DefaultValue="Save to matter"/>
+        <bt:String id="searchLabel" DefaultValue="Search matters"/>
+        <bt:String id="boardLabel" DefaultValue="IMMS Board"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="saveTip" DefaultValue="File this email (and its attachments) into an IMMS SAM matter."/>
+        <bt:String id="searchTip" DefaultValue="Find a matter by number or title and open its record."/>
+        <bt:String id="boardTip" DefaultValue="Open the IMMS SAM matter board."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

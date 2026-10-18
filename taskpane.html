@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMMS SAM</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+  :root { --navy:#0c3866; --ink:#1d2433; --muted:#5b6577; --line:#e1e5ec; --soft:#f6f8fb; --ok:#1e7a3c; --err:#b42318; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Segoe UI",system-ui,sans-serif; font-size:13px; color:var(--ink); background:#fff; }
+  header { background:var(--navy); color:#fff; padding:12px 14px; }
+  header b { font-size:15px; display:block; }
+  header span { font-size:11px; opacity:.85; }
+  main { padding:12px 14px; }
+  .mail { background:var(--soft); border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin-bottom:10px; }
+  .mail small { color:var(--muted); display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; }
+  input { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:6px; font:inherit; margin-bottom:8px; }
+  input:focus { outline:2px solid var(--navy); outline-offset:-1px; }
+  ul { list-style:none; margin:0; padding:0; border:1px solid var(--line); border-radius:6px; max-height:52vh; overflow:auto; }
+  li { padding:8px 10px; border-bottom:1px solid var(--line); cursor:pointer; }
+  li:last-child { border-bottom:0; }
+  li:hover, li.sel { background:#e8eef6; }
+  li b { color:var(--navy); display:block; font-size:12px; }
+  .empty { color:var(--muted); padding:10px; cursor:default; }
+  button { width:100%; margin-top:10px; padding:9px; border-radius:6px; border:1px solid var(--navy); background:var(--navy);
+           color:#fff; font:600 13px "Segoe UI",sans-serif; cursor:pointer; }
+  button:disabled { opacity:.45; cursor:default; }
+  button.sec { background:#fff; color:var(--ink); border-color:var(--line); }
+  .msg { margin-top:10px; padding:8px 10px; border-radius:6px; font-size:12px; display:none; }
+  .msg.ok { display:block; background:#e6f4ea; color:var(--ok); }
+  .msg.err { display:block; background:#fdecea; color:var(--err); }
+  .hint { color:var(--muted); font-size:11.5px; margin-top:10px; line-height:1.4; }
+</style>
+</head>
+<body>
+<header><b>IMMS SAM</b><span id="sub">Matter management</span></header>
+<main>
+  <div id="mailBox" class="mail" style="display:none"><small>This email</small><span id="mailSubj"></span></div>
+  <div id="listBox">
+    <input id="q" placeholder="Search by number or title…" autocomplete="off">
+    <ul id="list"><li class="empty">Loading matters…</li></ul>
+    <button id="go" disabled>Save to matter</button>
+  </div>
+  <div id="boardBox" style="display:none">
+    <p>Open the IMMS SAM matter board in a new window.</p>
+    <button id="openBoard">Open IMMS Board</button>
+  </div>
+  <div id="msg" class="msg"></div>
+  <div id="hint" class="hint"></div>
+</main>
+<script>
+// ---- configuration --------------------------------------------------------
+var APP_URL = "PASTE_APP_URL_HERE";      // Power Apps web link of IMMS SAM
+var PREFIX  = "IMMS · ";                  // Outlook categories that represent matters
+// ---------------------------------------------------------------------------
+var mode = (new URLSearchParams(location.search).get("mode") || "save");
+var matters = [], selected = null;
+function $(id){ return document.getElementById(id); }
+function show(text, kind){ var m=$("msg"); m.className="msg "+kind; m.textContent=text; }
+function openUrl(u){
+  try { if (Office.context.ui && Office.context.ui.openBrowserWindow) { Office.context.ui.openBrowserWindow(u); return; } } catch(e) {}
+  window.open(u, "_blank");
+}
+function appLink(id){ return APP_URL + (APP_URL.indexOf("?")>=0 ? "&" : "?") + "matter=" + encodeURIComponent(id); }
+
+function render(){
+  var q = $("q").value.trim().toLowerCase(), ul = $("list"); ul.innerHTML = "";
+  var rows = matters.filter(function(m){ return !q || (m.id+" "+m.title).toLowerCase().indexOf(q) >= 0; });
+  if (!rows.length) {
+    ul.innerHTML = '<li class="empty">' + (matters.length ? "No matter matches your search." :
+      "No matters available in Outlook yet. In IMMS, open the matter and press “Outlook folder”.") + "</li>";
+    return;
+  }
+  rows.forEach(function(m){
+    var li = document.createElement("li");
+    li.innerHTML = "<b></b><span></span>";
+    li.firstChild.textContent = m.id; li.lastChild.textContent = m.title;
+    if (selected && selected.name === m.name) li.className = "sel";
+    li.onclick = function(){ selected = m; $("go").disabled = false; render();
+      if (mode === "search") openUrl(appLink(m.id)); };
+    ul.appendChild(li);
+  });
+}
+
+function loadMatters(){
+  Office.context.mailbox.masterCategories.getAsync(function(r){
+    if (r.status !== Office.AsyncResultStatus.Succeeded) { show("Could not read IMMS matters: " + r.error.message, "err"); return; }
+    matters = (r.value || []).filter(function(c){ return c.displayName.indexOf(PREFIX) === 0; }).map(function(c){
+      var rest = c.displayName.substring(PREFIX.length), p = rest.indexOf(" · ");
+      return { name:c.displayName, id: p>0 ? rest.substring(0,p) : rest, title: p>0 ? rest.substring(p+3) : "" };
+    }).sort(function(a,b){ return a.id < b.id ? 1 : -1; });
+    render();
+  });
+}
+
+function save(){
+  if (!selected) return;
+  var item = Office.context.mailbox.item;
+  $("go").disabled = true;
+  item.categories.getAsync(function(g){
+    var already = (g.value || []).some(function(c){ return c.displayName === selected.name; });
+    if (already) { show("This email is already queued for " + selected.id + ".", "ok"); return; }
+    item.categories.addAsync([selected.name], function(r){
+      if (r.status === Office.AsyncResultStatus.Succeeded)
+        show("Queued for " + selected.id + ". IMMS will file the email and its attachments in the matter within a few minutes.", "ok");
+      else { show("Could not mark the email: " + r.error.message, "err"); $("go").disabled = false; }
+    });
+  });
+}
+
+Office.onReady(function(){
+  if (mode === "board") {
+    $("sub").textContent = "Matter board"; $("listBox").style.display = "none"; $("boardBox").style.display = "block";
+    $("openBoard").onclick = function(){ openUrl(APP_URL); };
+    openUrl(APP_URL);
+    return;
+  }
+  if (mode === "search") {
+    $("sub").textContent = "Search matters"; $("go").style.display = "none";
+    $("hint").textContent = "Click a matter to open its record in IMMS.";
+  } else {
+    $("sub").textContent = "Save to matter";
+    var it = Office.context.mailbox.item;
+    if (it && it.subject !== undefined) { $("mailBox").style.display = "block"; $("mailSubj").textContent = it.subject || "(no subject)"; }
+    $("hint").textContent = "The email and its attachments are filed in the matter file, the same as dragging it to the matter's Outlook folder.";
+  }
+  $("q").oninput = render;
+  $("go").onclick = save;
+  loadMatters();
+});
+</script>
+</body>
+</html>
