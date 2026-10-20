@@ -41,6 +41,7 @@
     <input id="q" placeholder="Search by number or title…" autocomplete="off">
     <ul id="list"><li class="empty">Loading matters…</li></ul>
     <button id="go" disabled>Save to matter</button>
+    <button id="openM" class="sec" style="display:none">Open in IMMS</button>
   </div>
   <div id="boardBox" style="display:none">
     <p>Open the IMMS SAM matter board in a new window.</p>
@@ -78,6 +79,7 @@ function render(){
     li.firstChild.textContent = m.id; li.lastChild.textContent = m.title;
     if (selected && selected.name === m.name) li.className = "sel";
     li.onclick = function(){ selected = m; $("go").disabled = false; render();
+      if (mode !== "search") { $("openM").style.display = "block"; $("openM").textContent = "Open " + m.id + " in IMMS"; }
       if (mode === "search") openUrl(appLink(m.id)); };
     ul.appendChild(li);
   });
@@ -127,6 +129,7 @@ Office.onReady(function(){
   }
   $("q").oninput = render;
   $("go").onclick = save;
+  $("openM").onclick = function(){ if (selected) openUrl(appLink(selected.id)); };
   loadMatters();
 });
 </script>
