@@ -74,7 +74,7 @@ function openUrl(u){
   try { if (dlg) { dlg.close(); dlg = null; } } catch(e) {}
   var embed = u + (u.indexOf("?") >= 0 ? "&" : "?") + "source=iframe";   // Power Apps embedded mode
   Office.context.ui.displayDialogAsync(DIALOG_PAGE + "?to=" + encodeURIComponent(embed),
-    { height: 85, width: 60, displayInIframe: true },                     // floating window centred inside Outlook
+    { height: 80, width: 72, displayInIframe: true },                     // floating window centred inside Outlook
     function(r){
       if (r.status !== Office.AsyncResultStatus.Succeeded) { openInBrowser(u); return; }
       dlg = r.value;
