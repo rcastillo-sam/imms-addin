@@ -44,8 +44,8 @@
     <button id="openM" class="sec" style="display:none">Open in IMMS</button>
   </div>
   <div id="boardBox" style="display:none">
-    <p>Open the IMMS SAM matter board in a new window.</p>
-    <button id="openBoard">Open IMMS Board</button>
+    <p>Open the IMMS SAM matter dashboard in a new window.</p>
+    <button id="openBoard">Open IMMS Dashboard</button>
   </div>
   <div id="msg" class="msg"></div>
   <div id="hint" class="hint"></div>
@@ -59,9 +59,26 @@ var mode = (new URLSearchParams(location.search).get("mode") || "save");
 var matters = [], selected = null;
 function $(id){ return document.getElementById(id); }
 function show(text, kind){ var m=$("msg"); m.className="msg "+kind; m.textContent=text; }
-function openUrl(u){
+var DIALOG_PAGE = "https://rcastillo-sam.github.io/imms-addin/open.html"; // same domain as this panel (required by Office)
+var dlg = null;
+function openInBrowser(u){
   try { if (Office.context.ui && Office.context.ui.openBrowserWindow) { Office.context.ui.openBrowserWindow(u); return; } } catch(e) {}
   window.open(u, "_blank");
+}
+// Opens IMMS in a centred window (about 60% wide, 85% high) instead of a full browser window.
+function openUrl(u){
+  var canDialog = false;
+  try { canDialog = !!(Office.context.ui && Office.context.ui.displayDialogAsync &&
+                      Office.context.requirements.isSetSupported("Mailbox", "1.4")); } catch(e) {}
+  if (!canDialog) { openInBrowser(u); return; }
+  try { if (dlg) { dlg.close(); dlg = null; } } catch(e) {}
+  Office.context.ui.displayDialogAsync(DIALOG_PAGE + "?to=" + encodeURIComponent(u),
+    { height: 85, width: 60, displayInIframe: false },
+    function(r){
+      if (r.status !== Office.AsyncResultStatus.Succeeded) { openInBrowser(u); return; }
+      dlg = r.value;
+      dlg.addEventHandler(Office.EventType.DialogEventReceived, function(){ dlg = null; });
+    });
 }
 function appLink(id){ return APP_URL + (APP_URL.indexOf("?")>=0 ? "&" : "?") + "matter=" + encodeURIComponent(id); }
 
@@ -113,7 +130,7 @@ function save(){
 
 Office.onReady(function(){
   if (mode === "board") {
-    $("sub").textContent = "Matter board"; $("listBox").style.display = "none"; $("boardBox").style.display = "block";
+    $("sub").textContent = "Matter dashboard"; $("listBox").style.display = "none"; $("boardBox").style.display = "block";
     $("openBoard").onclick = function(){ openUrl(APP_URL); };
     openUrl(APP_URL);
     return;

@@ -5,11 +5,11 @@
            xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
   <Id>6c119159-43f0-45d6-bc57-048e15927518</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.0.0.1</Version>
   <ProviderName>ICAO SAM</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="IMMS SAM"/>
-  <Description DefaultValue="File emails into IMMS SAM matters, search matters and open the matter board."/>
+  <Description DefaultValue="File emails into IMMS SAM matters, search matters and open the matter dashboard."/>
   <IconUrl DefaultValue="https://rcastillo-sam.github.io/imms-addin/icon-64.png"/>
   <HighResolutionIconUrl DefaultValue="https://rcastillo-sam.github.io/imms-addin/icon-128.png"/>
   <SupportUrl DefaultValue="https://rcastillo-sam.github.io/imms-addin/"/>
@@ -124,12 +124,12 @@
         <bt:String id="groupLabel" DefaultValue="IMMS SAM"/>
         <bt:String id="saveLabel" DefaultValue="Save to matter"/>
         <bt:String id="searchLabel" DefaultValue="Search matters"/>
-        <bt:String id="boardLabel" DefaultValue="IMMS Board"/>
+        <bt:String id="boardLabel" DefaultValue="IMMS Dashboard"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="saveTip" DefaultValue="File this email (and its attachments) into an IMMS SAM matter."/>
         <bt:String id="searchTip" DefaultValue="Find a matter by number or title and open its record."/>
-        <bt:String id="boardTip" DefaultValue="Open the IMMS SAM matter board."/>
+        <bt:String id="boardTip" DefaultValue="Open the IMMS SAM matter dashboard."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

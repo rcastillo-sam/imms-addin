@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMMS SAM</title>
+<style>body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;color:#1d2433;background:#fff;display:flex;align-items:center;justify-content:center;height:100vh}
+p{font-size:14px;color:#5b6577}</style>
+</head>
+<body>
+<p id="m">Opening IMMS SAM…</p>
+<script>
+// Only the IMMS SAM app may be opened from here (prevents use as an open redirect).
+var ALLOWED = "https://apps.powerapps.com/play/e/default-e6093642-fb63-48bb-8683-d1d5da2a12ea/a/162292c9-6a5e-4336-871a-e4d7416d2f93";
+var to = new URLSearchParams(location.search).get("to") || "";
+if (to.indexOf(ALLOWED) === 0) { location.replace(to); }
+else { document.getElementById("m").textContent = "This link cannot be opened."; }
+</script>
+</body>
+</html>
