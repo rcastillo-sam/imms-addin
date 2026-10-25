@@ -72,8 +72,9 @@ function openUrl(u){
                       Office.context.requirements.isSetSupported("Mailbox", "1.4")); } catch(e) {}
   if (!canDialog) { openInBrowser(u); return; }
   try { if (dlg) { dlg.close(); dlg = null; } } catch(e) {}
-  Office.context.ui.displayDialogAsync(DIALOG_PAGE + "?to=" + encodeURIComponent(u),
-    { height: 85, width: 60, displayInIframe: false },
+  var embed = u + (u.indexOf("?") >= 0 ? "&" : "?") + "source=iframe";   // Power Apps embedded mode
+  Office.context.ui.displayDialogAsync(DIALOG_PAGE + "?to=" + encodeURIComponent(embed),
+    { height: 85, width: 60, displayInIframe: true },                     // floating window centred inside Outlook
     function(r){
       if (r.status !== Office.AsyncResultStatus.Succeeded) { openInBrowser(u); return; }
       dlg = r.value;
