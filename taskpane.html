@@ -88,7 +88,7 @@ function render(){
   var rows = matters.filter(function(m){ return !q || (m.id+" "+m.title).toLowerCase().indexOf(q) >= 0; });
   if (!rows.length) {
     ul.innerHTML = '<li class="empty">' + (matters.length ? "No matter matches your search." :
-      "No matters available in Outlook yet. In IMMS, open the matter and press “Outlook folder”.") + "</li>";
+      "No matters available in Outlook yet. New matters appear here automatically about 15 minutes after they are created in IMMS.") + "</li>";
     return;
   }
   rows.forEach(function(m){
