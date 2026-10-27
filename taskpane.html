@@ -138,12 +138,12 @@ Office.onReady(function(){
   }
   if (mode === "search") {
     $("sub").textContent = "Search matters"; $("go").style.display = "none";
-    $("hint").textContent = "Click a matter to open its record in IMMS.";
+    $("hint").textContent = "Click a matter to open its record in IMMS. Only open matters are listed; closed matters are in the IMMS Dashboard.";
   } else {
     $("sub").textContent = "Save to matter";
     var it = Office.context.mailbox.item;
     if (it && it.subject !== undefined) { $("mailBox").style.display = "block"; $("mailSubj").textContent = it.subject || "(no subject)"; }
-    $("hint").textContent = "The email and its attachments are filed in the matter file, the same as dragging it to the matter's Outlook folder.";
+    $("hint").textContent = "The email and its attachments are filed in the matter file, the same as dragging it to the matter's Outlook folder. Only open matters are listed.";
   }
   $("q").oninput = render;
   $("go").onclick = save;
