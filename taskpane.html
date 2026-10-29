@@ -54,9 +54,10 @@
 // ---- configuration --------------------------------------------------------
 var APP_URL = "https://apps.powerapps.com/play/e/default-e6093642-fb63-48bb-8683-d1d5da2a12ea/a/162292c9-6a5e-4336-871a-e4d7416d2f93?tenantId=e6093642-fb63-48bb-8683-d1d5da2a12ea";      // Power Apps web link of IMMS SAM
 var PREFIX  = "IMMS · ";                  // Outlook categories that represent matters
+var QUEUE   = "IMMS queue";               // extra category: tells IMMS the email is waiting to be filed
 // ---------------------------------------------------------------------------
 var mode = (new URLSearchParams(location.search).get("mode") || "save");
-var matters = [], selected = null;
+var matters = [], selected = null, hasQueue = false;
 function $(id){ return document.getElementById(id); }
 function show(text, kind){ var m=$("msg"); m.className="msg "+kind; m.textContent=text; }
 var DIALOG_PAGE = "https://rcastillo-sam.github.io/imms-addin/open.html"; // same domain as this panel (required by Office)
@@ -106,11 +107,20 @@ function render(){
 function loadMatters(){
   Office.context.mailbox.masterCategories.getAsync(function(r){
     if (r.status !== Office.AsyncResultStatus.Succeeded) { show("Could not read IMMS matters: " + r.error.message, "err"); return; }
+    hasQueue = (r.value || []).some(function(c){ return c.displayName === QUEUE; });
     matters = (r.value || []).filter(function(c){ return c.displayName.indexOf(PREFIX) === 0; }).map(function(c){
       var rest = c.displayName.substring(PREFIX.length), p = rest.indexOf(" · ");
       return { name:c.displayName, id: p>0 ? rest.substring(0,p) : rest, title: p>0 ? rest.substring(p+3) : "" };
     }).sort(function(a,b){ return a.id < b.id ? 1 : -1; });
     render();
+  });
+}
+
+// Creates the "IMMS queue" category the first time it is needed.
+function ensureQueue(done){
+  if (hasQueue) { done(); return; }
+  Office.context.mailbox.masterCategories.addAsync([{ displayName: QUEUE, color: Office.MailboxEnums.CategoryColor.Preset7 }], function(){
+    hasQueue = true; done();   // if it already existed, adding the email category still works
   });
 }
 
@@ -121,10 +131,12 @@ function save(){
   item.categories.getAsync(function(g){
     var already = (g.value || []).some(function(c){ return c.displayName === selected.name; });
     if (already) { show("This email is already queued for " + selected.id + ".", "ok"); return; }
-    item.categories.addAsync([selected.name], function(r){
-      if (r.status === Office.AsyncResultStatus.Succeeded)
-        show("Queued for " + selected.id + ". IMMS will file the email and its attachments in the matter within a few minutes.", "ok");
-      else { show("Could not mark the email: " + r.error.message, "err"); $("go").disabled = false; }
+    ensureQueue(function(){
+      item.categories.addAsync([selected.name, QUEUE], function(r){
+        if (r.status === Office.AsyncResultStatus.Succeeded)
+          show("Queued for " + selected.id + ". IMMS will file the email and its attachments in the matter within a few minutes. The email stays in your Inbox.", "ok");
+        else { show("Could not mark the email: " + r.error.message, "err"); $("go").disabled = false; }
+      });
     });
   });
 }
@@ -143,7 +155,7 @@ Office.onReady(function(){
     $("sub").textContent = "Save to matter";
     var it = Office.context.mailbox.item;
     if (it && it.subject !== undefined) { $("mailBox").style.display = "block"; $("mailSubj").textContent = it.subject || "(no subject)"; }
-    $("hint").textContent = "The email and its attachments are filed in the matter file, the same as dragging it to the matter's Outlook folder. Only open matters are listed.";
+    $("hint").textContent = "The email and its attachments are filed in the matter file in SharePoint. The email stays in your Inbox and gets the category \"Filed <matter number>\". Only open matters are listed.";
   }
   $("q").oninput = render;
   $("go").onclick = save;
